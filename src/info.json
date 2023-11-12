@@ -1,0 +1,9 @@
+{
+    "id": "mango-plugin-id",
+    "title": "mango plugin title",
+    "placeholder": "Search mango plugin",
+    "wait_seconds": 1,
+
+    "api_version": 2,
+    "settings": {}
+}

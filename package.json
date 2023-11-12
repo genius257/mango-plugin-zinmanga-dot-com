@@ -1,0 +1,19 @@
+{
+  "name": "mango-plugin-template",
+  "version": "1.0.0",
+  "description": "Mango self hosted manga server plugin template repository",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Anders Pedersen",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@genius257/mango-plugin": "^1.0.3"
+  }
+}
