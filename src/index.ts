@@ -1,6 +1,6 @@
 import mango, * as Mango from "@genius257/mango-plugin";
 
-const mainUrl = "https://site.tld";
+const mainUrl = "https://zinmanga.com";
 
 function fixencodeURIComponent(component: string): string {
     return encodeURIComponent(component).replace(/%20/g, '+');
@@ -113,26 +113,44 @@ class HttpResponse {
  * Returns manga matching the query.
  */
 const searchManga: Mango.searchManga = (query: string) => {
-    const httpResult = mango.get(`${mainUrl}/search?query=${fixencodeURIComponent(query)}`);
+    const httpResult = mango.get(
+        `${mainUrl}/?s=${fixencodeURIComponent(query)}&post_type=wp-manga&op=&author=&artist=&release=&adult=`,
+        {
+            "Host": "zinmanga.com",
+            "Referer": "https://zinmanga.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+        }
+    );
 
     if (httpResult.status_code !== 200) {
         mango.raise(`HTTP status: ${httpResult.status_code} ${(HttpResponse.statusTexts as Record<string, string>)[httpResult.status_code.toString()] ?? 'Unknown'}`);
     }
 
-    const manga = mango.css(httpResult.body, 'div.item').map<Mango.Manga | null>(manga => {
-        const link = mango.css(manga, 'a')[0];
+    const manga = mango.css(httpResult.body, 'div.row.c-tabs-item__content').map<Mango.Manga | null>(manga => {
+        const link = mango.css(mango.css(manga, 'div.post-title')[0] ?? '', 'a')[0];
 
         if (link === undefined) {
             return null;
         }
 
+        const linkValue = mango.attribute(link, "href");
+
+        if (linkValue === undefined) {
+            return null;
+        }
+
+        const cover = mango.css(manga, 'img')[0];
+        const authors = mango.css(mango.css(manga, 'div.mg_author')[0] ?? '', 'a');
+        const genres = mango.css(manga, '.mg_genres .summary-content');
+        const status = mango.text(mango.css(manga, '.mg_status .summary-content a')[0] ?? '');
+
         return {
-            id: mango.attribute(link, "title"),
-            authors: [],
-            cover_url: mango.attribute(mango.css(link, 'img')[0] ?? '', 'src'),
-            description: "",
-            tags: [],
-            title: mango.attribute(link, "title"),
+            id: linkValue.trim().split('/').slice(-2, -1)[0]!,
+            authors: authors.map(author => mango.text(author)),
+            cover_url: mango.attribute(cover ?? '', 'src'),
+            description: `Status: ${status}`,
+            tags: genres.map(genre => mango.text(genre)),
+            title: mango.text(link),
         } satisfies Mango.Manga;
     }).filter((value): value is Exclude<typeof value, null> => value !== null);
 
@@ -143,26 +161,110 @@ const searchManga: Mango.searchManga = (query: string) => {
  * Returns chapters for manga with matching id.
  */
 const listChapters: Mango.listChapters = (manga_id: string) => {
-    const chapters: Array<Mango.Chapter> = [];
+    //const chapters: Array<Mango.Chapter> = [];
 
-    return Mango.json_encode(chapters);
+    const httpResult = mango.get(
+        `${mainUrl}/manga/${manga_id}/`,
+        {
+            "Host": "zinmanga.com",
+            "Referer": "https://zinmanga.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+        }
+    );
+
+    if (httpResult.status_code !== 200) {
+        mango.raise(`HTTP status: ${httpResult.status_code} ${(HttpResponse.statusTexts as Record<string, string>)[httpResult.status_code.toString()] ?? 'Unknown'}`);
+    }
+
+    const chapters = mango.css(httpResult.body, 'li.wp-manga-chapter');
+    //const summary
+
+    return Mango.json_encode(chapters.map<Mango.Chapter|null>(chapter => {
+        const link = mango.css(chapter, 'a')[0] ?? '';
+        const url = mango.attribute(link, 'href');
+
+        if (url === undefined) {
+            // no href available on link, skipping chapter.
+            return null;
+        }
+
+        const urlShards = url.split('/');
+        // const id = urlShards[urlShards.length - 2];
+        const id = urlShards.slice(-3).join('/');
+
+        if (id === undefined) {
+            return null;
+        }
+
+        return {
+            chapter: mango.text(link).split(' ').filter(v=>v)[1] ?? '',
+            groups: [],
+            id: id,
+            language: "",
+            manga_title: mango.text(mango.css(httpResult.body, '.post-title h1')[0]||'').trim(),
+            pages: 0,
+            tags: [],
+            title: mango.text(link).trim(),
+            volume: "1",
+        }
+    }).filter((value): value is Exclude<typeof value, null> => value !== null));
 }
+
+let page: number = 0;
+let pages: string[] = [];
 
 /**
  * Returns chapter information used by Mango downloads.
  */
-const selectChapter: Mango.selectChapter = (id: string) => {
+const selectChapter: Mango.selectChapter = (chapter_id: string) => {
+    const httpResult = mango.get(
+        `${mainUrl}/manga/${chapter_id}/`,
+        {
+            "Host": "zinmanga.com",
+            "Referer": "https://zinmanga.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+        }
+    );
+
+    if (httpResult.status_code !== 200) {
+        mango.raise(`HTTP status: ${httpResult.status_code} ${(HttpResponse.statusTexts as Record<string, string>)[httpResult.status_code.toString()] ?? 'Unknown'}`);
+    }
+
+    const titleElement = mango.css(httpResult.body, 'meta[property="og:title"]')[0];
+    if (titleElement === undefined) {
+        mango.raise('could not find manga title on chapter page!');
+    }
+
+    const mangaTitle = mango.attribute(titleElement, 'content');
+
+    if (titleElement === undefined) {
+        mango.raise('could not extract manga title on chapter page!');
+    }
+
+    const images = mango.css(httpResult.body, '.reading-content img');
+
+    const chapterTextElement = mango.css(httpResult.body, 'li.active')[0];
+
+    if (chapterTextElement === undefined) {
+        mango.raise('could not find chapter number text');
+    }
+
     const chapter: Mango.Chapter = {
-        chapter: "",
-        groups: [],
-        id: "",
-        language: "",
-        manga_title: "",
-        pages: 0,
-        tags: [],
-        title: "",
-        volume: "",
+        chapter: mango.text(chapterTextElement).trim().split(' ').slice(1).join(' '),
+        id: chapter_id,
+        manga_title: mango.text(titleElement),
+        pages: images.length,
+        title: mango.text(chapterTextElement).trim(),
     };
+
+    pages = images.map((image, index) => {
+        const src = mango.attribute(image, 'src');
+        if (src === undefined) {
+            mango.raise(`could not extract src attribute from the #${index} image element.`);
+        }
+
+        return src.trim();
+    })
 
     return Mango.json_encode(chapter);
 };
@@ -171,20 +273,98 @@ const selectChapter: Mango.selectChapter = (id: string) => {
  * Gets current page from current capter in current manga, and increments the internal page index reference.
  */
 const nextPage: Mango.nextPage = () => {
-    const page: Mango.Page = {
-        filename: "",
-        headers: {},
-        url: "",
+
+    const currentPage: Mango.Page = {
+        filename: pages[page]!.split('/').slice(-1)[0]!,
+        headers: {
+            'Referer':'https://zinmanga.com/',
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+        },
+        url: pages[page]!,
     };
 
-    return Mango.json_encode(page);
+    return Mango.json_encode(currentPage);
 };
+
+const releaseDateRegex = /^(\d+)\/\d+\/\d+$/;
+const humanReadableDifferenceRegex = /^(\d+)\w+(second|minute|hour|day)s?\w+ago$/;
+const chapterReleaseDateToTimestamp = (chapterReleaseDate: string): number => {
+    let releaseDate: string[]|null = [];
+    if ((releaseDate = chapterReleaseDate.match(releaseDateRegex)) !== null) {
+        return Date.parse(`${releaseDate[3]}-${releaseDate[1]}-${releaseDate[2]}`);
+    }
+
+    if ((releaseDate = chapterReleaseDate.match(humanReadableDifferenceRegex))) {
+        const amount = parseInt(releaseDate[1]!);
+        switch (releaseDate['2']) {
+            case 'second':
+                return Date.now() + amount;
+            case 'minute':
+                return Date.now() + amount * 60;
+            case 'hour':
+                return Date.now() + amount * 60 * 60;
+            case 'day':
+                return Date.now() + amount * 60 * 60 * 24;
+            default:
+                mango.raise(`unsupported duration unit: "${releaseDate[2]}".`);
+        }
+    }
+
+    mango.raise(`Could not parse chapter release date string: "${chapterReleaseDate}".`)
+}
 
 /**
  * Returns all chapters newer than provided timestamp.
  */
 const newChapters: Mango.newChapters = (manga_id: string, after_timestamp: number) => {
-    const chapters: Array<Mango.Chapter> = [];
+    const httpResult = mango.get(
+        `${mainUrl}/manga/${manga_id}/`,
+        {
+            "Host": "zinmanga.com",
+            "Referer": "https://zinmanga.com/",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+        }
+    );
 
-    return Mango.json_encode(chapters);
+    if (httpResult.status_code !== 200) {
+        mango.raise(`HTTP status: ${httpResult.status_code} ${(HttpResponse.statusTexts as Record<string, string>)[httpResult.status_code.toString()] ?? 'Unknown'}`);
+    }
+
+    const chapters = mango.css(httpResult.body, 'li.wp-manga-chapter');
+
+    return Mango.json_encode(chapters.map(chapter => {
+        const chapterReleaseDateElement = mango.css(chapter, '.chapter-release-date i')[0] || mango.css(chapter, '.chapter-release-date a')[0];
+        if (chapterReleaseDateElement === undefined) {
+            return null;
+        }
+
+        const chapterReleaseDate = mango.attribute(chapterReleaseDateElement, 'title') || mango.text(chapterReleaseDateElement);
+
+        if (chapterReleaseDateToTimestamp(chapterReleaseDate.trim()) <= after_timestamp) {
+            return null
+        }
+
+        const link = mango.css(chapter, 'a')[0] ?? '';
+        const url = mango.attribute(link, 'href');
+
+        if (url === undefined) {
+            // no href available on link, skipping chapter.
+            return null;
+        }
+
+        const urlShards = url.split('/');
+        // const id = urlShards[urlShards.length - 2];
+        const id = urlShards.slice(-3).join('/');
+
+        if (id === undefined) {
+            return null;
+        }
+
+        return {
+            id: id,
+            manga_title: mango.text(mango.css(httpResult.body, '.post-title h1')[0]||'').trim(),
+            pages: 0,
+            title: mango.text(link).trim(),
+        } satisfies Mango.Chapter;
+    }).filter((v):v is Exclude<typeof v, null> => v !== null));
 };
