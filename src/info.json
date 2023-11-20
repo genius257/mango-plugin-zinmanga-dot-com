@@ -1,7 +1,7 @@
 {
-    "id": "mango-plugin-id",
-    "title": "mango plugin title",
-    "placeholder": "Search mango plugin",
+    "id": "zinmanga_dot_com",
+    "title": "zinmanga.com",
+    "placeholder": "Search zinmanga.com",
     "wait_seconds": 1,
 
     "api_version": 2,
