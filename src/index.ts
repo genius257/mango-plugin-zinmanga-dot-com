@@ -147,7 +147,7 @@ const searchManga: Mango.searchManga = (query: string) => {
         return {
             id: linkValue.trim().split('/').slice(-2, -1)[0]!,
             authors: authors.map(author => mango.text(author)),
-            cover_url: mango.attribute(cover ?? '', 'src'),
+            cover_url: mango.attribute(cover ?? '', 'data-src'),
             description: `Status: ${status}`,
             tags: genres.map(genre => mango.text(genre)),
             title: mango.text(link),
