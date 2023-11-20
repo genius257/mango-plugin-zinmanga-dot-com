@@ -226,7 +226,7 @@ let pages: string[] = [];
  */
 const selectChapter: Mango.selectChapter = (chapter_id: string) => {
     const httpResult = mango.get(
-        `${mainUrl}/manga/${chapter_id}/`,
+        `${mainUrl}/manga/${chapter_id}`,
         {
             "Host": "zinmanga.com",
             "Referer": "https://zinmanga.com/",
