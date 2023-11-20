@@ -1,5 +1,13 @@
 import mango, * as Mango from "@genius257/mango-plugin";
 
+declare global {
+    var searchManga: Mango.searchManga;
+    var listChapters: Mango.listChapters;
+    var selectChapter: Mango.selectChapter;
+    var nextPage: Mango.nextPage;
+    var newChapters: Mango.newChapters;
+}
+
 const mainUrl = "https://zinmanga.com";
 
 function fixencodeURIComponent(component: string): string {
