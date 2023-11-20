@@ -368,3 +368,9 @@ const newChapters: Mango.newChapters = (manga_id: string, after_timestamp: numbe
         } satisfies Mango.Chapter;
     }).filter((v):v is Exclude<typeof v, null> => v !== null));
 };
+
+global.searchManga = searchManga;
+global.listChapters = listChapters;
+global.selectChapter = selectChapter;
+global.nextPage = nextPage;
+global.newChapters = newChapters;
