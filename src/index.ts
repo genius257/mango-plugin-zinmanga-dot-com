@@ -120,7 +120,7 @@ class HttpResponse {
 /**
  * Returns manga matching the query.
  */
-const searchManga: Mango.searchManga = (query: string) => {
+export const searchManga: Mango.searchManga = (query: string) => {
     const httpResult = mango.get(
         `${mainUrl}/?s=${fixencodeURIComponent(query)}&post_type=wp-manga&op=&author=&artist=&release=&adult=`,
         {
@@ -168,7 +168,7 @@ const searchManga: Mango.searchManga = (query: string) => {
 /**
  * Returns chapters for manga with matching id.
  */
-const listChapters: Mango.listChapters = (manga_id: string) => {
+export const listChapters: Mango.listChapters = (manga_id: string) => {
     //const chapters: Array<Mango.Chapter> = [];
 
     const httpResult = mango.get(
@@ -224,7 +224,7 @@ let pages: string[] = [];
 /**
  * Returns chapter information used by Mango downloads.
  */
-const selectChapter: Mango.selectChapter = (chapter_id: string) => {
+export const selectChapter: Mango.selectChapter = (chapter_id: string) => {
     const httpResult = mango.get(
         `${mainUrl}/manga/${chapter_id}`,
         {
@@ -280,7 +280,7 @@ const selectChapter: Mango.selectChapter = (chapter_id: string) => {
 /**
  * Gets current page from current capter in current manga, and increments the internal page index reference.
  */
-const nextPage: Mango.nextPage = () => {
+export const nextPage: Mango.nextPage = () => {
 
     const currentPage: Mango.Page = {
         filename: pages[page]!.split('/').slice(-1)[0]!,
@@ -324,7 +324,7 @@ const chapterReleaseDateToTimestamp = (chapterReleaseDate: string): number => {
 /**
  * Returns all chapters newer than provided timestamp.
  */
-const newChapters: Mango.newChapters = (manga_id: string, after_timestamp: number) => {
+export const newChapters: Mango.newChapters = (manga_id: string, after_timestamp: number) => {
     const httpResult = mango.get(
         `${mainUrl}/manga/${manga_id}/`,
         {
