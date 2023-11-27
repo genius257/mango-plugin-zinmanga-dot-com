@@ -2,11 +2,14 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  globals: {
-    'ts-jest': {
-      diagnostics: {
-        warnOnly: true
-      }
-    }
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        diagnostics: {
+          warnOnly: true
+        },
+      },
+    ]
   }
 };
