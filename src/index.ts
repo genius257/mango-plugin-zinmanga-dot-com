@@ -266,7 +266,7 @@ export const selectChapter: Mango.selectChapter = (chapter_id: string) => {
     };
 
     pages = images.map((image, index) => {
-        const src = mango.attribute(image, 'src');
+        const src = mango.attribute(image, 'data-src');
         if (src === undefined) {
             mango.raise(`could not extract src attribute from the #${index} image element.`);
         }
