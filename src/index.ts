@@ -291,6 +291,8 @@ export const nextPage: Mango.nextPage = () => {
         url: pages[page]!,
     };
 
+    page++;
+
     return Mango.json_encode(currentPage);
 };
 
