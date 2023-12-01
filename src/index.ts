@@ -274,6 +274,8 @@ export const selectChapter: Mango.selectChapter = (chapter_id: string) => {
         return src.trim();
     })
 
+    page = 0;
+
     return Mango.json_encode(chapter);
 };
 
