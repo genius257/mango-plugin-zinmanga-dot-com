@@ -281,6 +281,9 @@ export const selectChapter: Mango.selectChapter = (chapter_id: string) => {
  * Gets current page from current capter in current manga, and increments the internal page index reference.
  */
 export const nextPage: Mango.nextPage = () => {
+    if (page >= pages.length) {
+        return Mango.json_encode({});
+    }
 
     const currentPage: Mango.Page = {
         filename: pages[page]!.split('/').slice(-1)[0]!,
