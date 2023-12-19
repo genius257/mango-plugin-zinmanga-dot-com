@@ -1,4 +1,7 @@
-import mango, * as Mango from "@genius257/mango-plugin";
+import type MangoStatic from "@genius257/mango-plugin";
+import * as Mango from "@genius257/mango-plugin";
+
+declare const mango: typeof MangoStatic;
 
 declare global {
     var searchManga: Mango.searchManga;
