@@ -68,6 +68,13 @@ test('integration test: searching selecting and start downloading a chapter', ()
 
     expect(manga[0]!.title).toBe('The Foodie Next Door');
 
+    expect(manga[0]!.tags).toStrictEqual([
+        'Comedy',
+        'Drama',
+        'Romance',
+        'Shoujo',
+    ]);
+
     mangoGetResult.body = fs.readFileSync(`${__dirname}/../mocks/The Foodie Next Door Manga.htm`, 'utf8');
     const chapters: Chapter[] = JSON.parse(global.listChapters(manga[0]!.id));
 
