@@ -316,13 +316,13 @@ export const chapterReleaseDateToTimestamp = (chapterReleaseDate: string): numbe
         const amount = parseInt(releaseDate[1]!);
         switch (releaseDate['2']) {
             case 'second':
-                return Date.now() + amount;
+                return Date.now() - amount * 1000;
             case 'minute':
-                return Date.now() + amount * 60;
+                return Date.now() - amount * 1000 * 60;
             case 'hour':
-                return Date.now() + amount * 60 * 60;
+                return Date.now() - amount * 1000 * 60 * 60;
             case 'day':
-                return Date.now() + amount * 60 * 60 * 24;
+                return Date.now() - amount * 1000 * 60 * 60 * 24;
             default:
                 mango.raise(`unsupported duration unit: "${releaseDate[2]}".`);
         }
