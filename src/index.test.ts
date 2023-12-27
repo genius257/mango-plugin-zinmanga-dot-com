@@ -105,3 +105,47 @@ test('integration test: searching selecting and start downloading a chapter', ()
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
     });
 });
+
+test('integration test: checking for updates', () => {
+    mangoGetResult.body = fs.readFileSync(`${__dirname}/../mocks/The Foodie Next Door Manga.htm`, 'utf8');
+
+    const manga_id = "the-foodie-next-door";
+    const timestamp = Date.parse('2021-03-29');
+
+    const newChapters: Chapter[] = JSON.parse(global.newChapters(manga_id, timestamp));
+
+    expect(newChapters).toHaveLength(1);
+
+    const newChapter = newChapters[0]!;
+    expect(newChapter.title).toBe('Chapter 91');
+});
+
+describe('chapterReleaseDateToTimestamp', () => {
+    test('with date string', () => {
+        const actual = plugin.chapterReleaseDateToTimestamp('03/29/2021');
+        const expected = Date.parse('2021-03-29');
+        expect(actual).toBe(expected);
+    });
+
+    test('with human readable string', () => {
+        // 1703554836
+        // 1703554738838
+        jest.useFakeTimers().setSystemTime(new Date('2023-12-26'));
+
+        let actual = plugin.chapterReleaseDateToTimestamp('4 seconds ago');
+        let expected = Date.now() - 4 * 1000;
+        expect(actual).toBe(expected);
+
+        actual = plugin.chapterReleaseDateToTimestamp('4 minutes ago');
+        expected = Date.now() - 4 * 1000 * 60;
+        expect(actual).toBe(expected);
+
+        actual = plugin.chapterReleaseDateToTimestamp('4 hours ago');
+        expected = Date.now() - 4 * 1000 * 60 * 60;
+        expect(actual).toBe(expected);
+
+        actual = plugin.chapterReleaseDateToTimestamp('4 days ago');
+        expected = Date.now() - 4 * 1000 * 60 * 60 * 24;
+        expect(actual).toBe(expected);
+    });
+});
