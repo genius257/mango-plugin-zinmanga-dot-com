@@ -152,8 +152,8 @@ export const searchManga: Mango.searchManga = (query: string) => {
 
         const cover = mango.css(manga, 'img')[0];
         const authors = mango.css(mango.css(manga, 'div.mg_author')[0] ?? '', 'a');
-        const genres = mango.css(manga, '.mg_genres .summary-content');
-        const status = mango.text(mango.css(manga, '.mg_status .summary-content a')[0] ?? '');
+        const genres = mango.css(manga, '.mg_genres .summary-content a');
+        const status = mango.text(mango.css(manga, '.mg_status .summary-content')[0] ?? '');
 
         return {
             id: linkValue.trim().split('/').slice(-2, -1)[0]!,
