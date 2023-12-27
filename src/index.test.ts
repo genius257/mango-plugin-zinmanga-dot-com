@@ -87,10 +87,19 @@ test('integration test: searching selecting and start downloading a chapter', ()
 
     expect(chapter.pages).toBe(32);
 
-    const page: Page = JSON.parse(global.nextPage());
+    let page: Page = JSON.parse(global.nextPage());
 
     expect(page.filename).toBe("chap_0_1.jpg");
     expect(page.url).toBe("https://z-cdn.zinmanga.com/manga_b7b9344f48a7655e72a6467e297ed557/chapter_0//chap_0_1.jpg");
+    expect(page.headers).toStrictEqual({
+        'Referer': 'https://zinmanga.com/',
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
+    });
+
+    page = JSON.parse(global.nextPage());
+
+    expect(page.filename).toBe("chap_0_2.jpg");
+    expect(page.url).toBe("https://z-cdn.zinmanga.com/manga_b7b9344f48a7655e72a6467e297ed557/chapter_0//chap_0_2.jpg");
     expect(page.headers).toStrictEqual({
         'Referer': 'https://zinmanga.com/',
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
