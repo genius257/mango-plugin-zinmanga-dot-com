@@ -1,7 +1,7 @@
 {
   "name": "mango-plugin-zinmanga-dot-com",
   "version": "1.0.0",
-  "description": "Mango self hosted manga server plugin template repository",
+  "description": "Mango self hosted manga server plugin for zinmanga.com",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
