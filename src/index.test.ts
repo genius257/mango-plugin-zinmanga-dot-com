@@ -60,7 +60,7 @@ test('mango plugin functions are all global functions', () => {
     }
 });
 
-test('integration test', () => {
+test('integration test: searching selecting and start downloading a chapter', () => {
     mangoGetResult.body = fs.readFileSync(`${__dirname}/../mocks/search.htm`, 'utf8');
     const manga: Manga[] = JSON.parse(plugin.searchManga('food'));
 
