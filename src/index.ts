@@ -304,9 +304,9 @@ export const nextPage: Mango.nextPage = () => {
     return Mango.json_encode(currentPage);
 };
 
-const chapterReleaseDateToTimestamp = (chapterReleaseDate: string): number => {
 const releaseDateRegex = /^(\d+)\/(\d+)\/(\d+)$/;
 const humanReadableDifferenceRegex = /^(\d+)\s+(second|minute|hour|day)s?\s+ago$/;
+export const chapterReleaseDateToTimestamp = (chapterReleaseDate: string): number => {
     let releaseDate: string[]|null = [];
     if ((releaseDate = chapterReleaseDate.match(releaseDateRegex)) !== null) {
         return Date.parse(`${releaseDate[3]}-${releaseDate[1]}-${releaseDate[2]}`);
